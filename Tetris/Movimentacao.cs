@@ -14,7 +14,6 @@ namespace Tetris
 
         public Movimentacao()
         {
-            _Tetramino = TetraminoBase.ObterTetramino();
             NovoTetramino();
         }
 
@@ -232,7 +231,7 @@ namespace Tetris
 
         private void NovoTetramino()
         {
-            _Tetramino = TetraminoBase.ObterTetramino();
+            _Tetramino = new Tetramino();
             EscreverEmPosicao(_Tetramino.Cor);
         }
 

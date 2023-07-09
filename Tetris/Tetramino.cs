@@ -6,51 +6,125 @@ namespace Tetris
     {
         public List<Tuple<int, int>> Posicoes { get; set; }
         public int Cor { get; private set; }
-        private TipoTetramino TipoBloco { get; set; }
-        private int Versao { get; set; }
-        private int MaximoOpcoes { get; set; }
+        private TipoTetramino TipoTetramino { get; set; }
+        private int VersaoAtual { get; set; }
+        private int MaximoVersoes { get; set; }
 
         public Tetramino(List<Tuple<int, int>> posicoes, int cor, TipoTetramino tipoDeBloco, int versao, int maximoOpcoes)
         {
             Posicoes = posicoes;
             Cor = cor;
-            TipoBloco = tipoDeBloco;
-            Versao = versao;
-            MaximoOpcoes = maximoOpcoes;
+            TipoTetramino = tipoDeBloco;
+            VersaoAtual = versao;
+            MaximoVersoes = maximoOpcoes;
+        }
+
+        public Tetramino()
+        {
+            Posicoes = new();
+            ObterTetramino();
+        }
+
+        private int SorteiaItem(int totalOpcoes)
+        {
+            return new Random().Next(0, totalOpcoes);
+        }
+
+        public void ObterTetramino()
+        {
+            int linhaBase = Matriz.QtdLinhas - 1;
+            int colunaBase = Matriz.QtdColunas / 2;
+
+            var opcao = SorteiaItem(5);
+            if (opcao == 0)
+                BlocoQuadrado(linhaBase, colunaBase);
+            else if (opcao == 1)
+                BlocoT(linhaBase, colunaBase);
+            else if (opcao == 2)
+                BlocoL(linhaBase, colunaBase);
+            else if (opcao == 3)
+                BlocoS(linhaBase, colunaBase);
+            else
+                BlocoLinha(linhaBase, colunaBase);
+        }
+
+        private void BlocoQuadrado(int linhaBase, int colunaBase)
+        {
+            MaximoVersoes = 1;
+            VersaoAtual = SorteiaItem(MaximoVersoes);
+            Posicoes = TetraminoBase.BlocoQuadrado(linhaBase, colunaBase, VersaoAtual);
+            Cor = 1;
+            TipoTetramino = TipoTetramino.Quadrado;
+        }
+
+        private void BlocoLinha(int linhaBase, int colunaBase)
+        {
+            MaximoVersoes = 2;
+            VersaoAtual = SorteiaItem(MaximoVersoes);
+            Posicoes = TetraminoBase.BlocoLinha(linhaBase, colunaBase, VersaoAtual);
+            Cor = 2;
+            TipoTetramino = TipoTetramino.Linha;
+        }
+
+        private void BlocoT(int linhaBase, int colunaBase)
+        {
+            MaximoVersoes = 4;
+            VersaoAtual = SorteiaItem(MaximoVersoes);
+            Posicoes = TetraminoBase.BlocoT(linhaBase, colunaBase, VersaoAtual);
+            Cor = 3;
+            TipoTetramino = TipoTetramino.T;
+        }
+
+        private void BlocoL(int linhaBase, int colunaBase)
+        {
+            MaximoVersoes = 4;
+            VersaoAtual = SorteiaItem(MaximoVersoes);
+            Posicoes = TetraminoBase.BlocoL(linhaBase, colunaBase, VersaoAtual);
+            Cor = 4;
+            TipoTetramino = TipoTetramino.L;
+        }
+
+        private void BlocoS(int linhaBase, int colunaBase)
+        {
+            MaximoVersoes = 2;
+            VersaoAtual = SorteiaItem(MaximoVersoes);
+            Posicoes = TetraminoBase.BlocoS(linhaBase, colunaBase, VersaoAtual);
+            Cor = 5;
+            TipoTetramino = TipoTetramino.S;
         }
 
         public void Rotacionar()
         {
-            Versao++;
-            if (Versao >= MaximoOpcoes)
-                Versao = 0;
+            VersaoAtual++;
+            if (VersaoAtual >= MaximoVersoes)
+                VersaoAtual = 0;
 
             int coluna = Posicoes[0].Item2;
 
-            if (TipoBloco == TipoTetramino.Linha)
+            if (TipoTetramino == TipoTetramino.Linha)
             {
                 coluna += 1;
             }
-            else if (TipoBloco == TipoTetramino.T)
+            else if (TipoTetramino == TipoTetramino.T)
             {
-                if (Versao == 1) coluna -= 1;
-                if (Versao == 3) coluna += 2;
+                if (VersaoAtual == 1) coluna -= 1;
+                if (VersaoAtual == 3) coluna += 2;
             }
 
-            if (coluna == 10)
-                coluna = 9;
+            if (coluna == Matriz.QtdColunas)
+                coluna = Matriz.QtdColunas - 1;
 
             List<Tuple<int, int>> temp;
-            if (TipoBloco == TipoTetramino.L)
-                temp = TetraminoBase.BlocoL(Posicoes[0].Item1, coluna, Versao).Posicoes;
-            else if (TipoBloco == TipoTetramino.S)
-                temp = TetraminoBase.BlocoS(Posicoes[0].Item1, coluna, Versao).Posicoes;
-            else if (TipoBloco == TipoTetramino.T)
-                temp = TetraminoBase.BlocoT(Posicoes[0].Item1, coluna, Versao).Posicoes;
-            else if (TipoBloco == TipoTetramino.Quadrado)
-                temp = TetraminoBase.BlocoQuadrado(Posicoes[0].Item1, coluna, Versao).Posicoes;
+            if (TipoTetramino == TipoTetramino.L)
+                temp = TetraminoBase.BlocoL(Posicoes[0].Item1, coluna, VersaoAtual);
+            else if (TipoTetramino == TipoTetramino.S)
+                temp = TetraminoBase.BlocoS(Posicoes[0].Item1, coluna, VersaoAtual);
+            else if (TipoTetramino == TipoTetramino.T)
+                temp = TetraminoBase.BlocoT(Posicoes[0].Item1, coluna, VersaoAtual);
+            else if (TipoTetramino == TipoTetramino.Quadrado)
+                temp = TetraminoBase.BlocoQuadrado(Posicoes[0].Item1, coluna, VersaoAtual);
             else // bloco linha
-                temp = TetraminoBase.BlocoLinha(Posicoes[0].Item1, coluna, Versao).Posicoes;
+                temp = TetraminoBase.BlocoLinha(Posicoes[0].Item1, coluna, VersaoAtual);
 
             temp = ValidarPosicaoEstremidades(temp);
 
@@ -63,7 +137,7 @@ namespace Tetris
             var podeGirar = true;
 
             // valida se na matriz, mas novas posições já estão preenchidas com algo
-            foreach(var item in tetraminoRotacionado)
+            foreach (var item in tetraminoRotacionado)
             {
                 if (Matriz.Posicoes[item.Item1, item.Item2] > 0)
                     podeGirar = false;
@@ -84,14 +158,14 @@ namespace Tetris
                 if (colunaDaEsquerda < 0)
                 {
                     problemaLadoEsquerdo = true;
-                    if(qtdColunasParaMovimentar > colunaDaEsquerda - 0)
+                    if (qtdColunasParaMovimentar > colunaDaEsquerda - 0)
                         qtdColunasParaMovimentar = colunaDaEsquerda - 0;
                 }
 
                 if (colunaDaDireita >= Matriz.QtdColunas)
                 {
                     problemaLadoDireito = true;
-                    if(qtdColunasParaMovimentar < colunaDaDireita - (Matriz.QtdColunas - 1))
+                    if (qtdColunasParaMovimentar < colunaDaDireita - (Matriz.QtdColunas - 1))
                         qtdColunasParaMovimentar = colunaDaDireita - (Matriz.QtdColunas - 1);
                 }
             }
@@ -104,7 +178,7 @@ namespace Tetris
 
         private List<Tuple<int, int>> Reposicionar(int qtdColunasParaMovimentar, bool problemaLadoEsquerdo, bool problemaLadoDireito, List<Tuple<int, int>> tetraminoRotacionado)
         {
-            var temp = new List<Tuple<int, int>> ();
+            var temp = new List<Tuple<int, int>>();
             foreach (var item in tetraminoRotacionado)
             {
                 if (problemaLadoEsquerdo)
