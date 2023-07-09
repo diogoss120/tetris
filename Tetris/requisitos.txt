@@ -1,0 +1,28 @@
+
+https://pt.wikipedia.org/wiki/Tetramin%C3%B3
+
+funcionalidades que preciso adicionar:
+
+
+- adicionar efeitos sonoros (se possível) ao completar uma linha e ao ganhar, como um beep do console por exemplo
+
+- quando o jogo fica muito rápido está dando problema na sensibilidade para rotacionar as peças, precisa analisar isso
+
+- refatorar o código, classes e métodos, reoganizar na classe correta os métodos, criar mais classes se necessário. Principalmente
+a parte de construção de blocos/tetraminos, criar enuns para representar a peça em uso
+
+
+
+
+
+	Resumo geral das funcionalidades
+O jogo deve ter um tabuleiro retangular onde as peças são colocadas.
+As peças devem ser geradas aleatoriamente e cair do topo do tabuleiro.
+O jogador deve ser capaz de mover as peças para a esquerda ou direita, girá-las e acelerar sua queda.
+As peças devem se encaixar perfeitamente umas nas outras quando caem, sem deixar espaços vazios.
+Quando uma linha completa é formada, ela deve ser eliminada e o jogador deve receber pontos.
+O jogo deve terminar quando as peças empilhadas atingem o topo do tabuleiro.
+O jogo deve ter um sistema de pontuação que aumenta à medida que o jogador elimina mais linhas.
+O jogo deve ter um sistema de níveis que aumenta à medida que o jogador elimina mais linhas, tornando o jogo mais difícil.
+O jogo deve ter uma interface gráfica que mostre o tabuleiro, as peças, a pontuação e o nível atual.
+O jogo deve ter efeitos sonoros e música para tornar a experiência mais imersiva.

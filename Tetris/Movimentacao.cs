@@ -1,0 +1,260 @@
+﻿using System.Runtime.InteropServices;
+
+namespace Tetris
+{
+    public class Movimentacao
+    {
+        private List<Tuple<int, int>> _Temp { get; set; }
+        private Bloco _Bloco { get; set; }
+
+        [DllImport("user32.dll")]
+        static extern short GetAsyncKeyState(int vKey);
+
+        public int QtdLinhasRemovidas { get; private set; }
+        public StatusJogo StatusJogo { get; private set; }
+
+        public Movimentacao()
+        {
+            _Bloco = new Bloco();
+            _Temp = new List<Tuple<int, int>>();
+            NovoTetramino();
+        }
+
+        public void MoverTetraminoParaLados(ConsoleKey comando)
+        {
+            if (comando != ConsoleKey.LeftArrow && comando != ConsoleKey.RightArrow)
+                return;
+
+            if (!ValidaSePodeMoverParaLado(comando))
+                return;
+
+            _Temp.Clear();
+            foreach (var item in _Bloco.Posicoes)
+            {
+                int linha = item.Item1;
+                int coluna = item.Item2;
+
+                if (comando == ConsoleKey.LeftArrow)
+                    coluna--;
+                else if (comando == ConsoleKey.RightArrow)
+                    coluna++;
+
+                _Temp.Add(Tuple.Create(linha, coluna));
+            }
+
+            Mover(_Temp);
+        }
+
+        private bool ValidaSePodeMoverParaLado(ConsoleKey key)
+        {
+            var validacao = new List<Tuple<int, int>>();
+            var linhas = _Bloco.Posicoes.Select(x => x.Item1).AsQueryable().Distinct().ToList();
+            foreach (var linha in linhas)
+            {
+                int colunaDoLado = 0;
+                if (key == ConsoleKey.LeftArrow)
+                    colunaDoLado = _Bloco.Posicoes.Where(e => e.Item1 == linha).Min(e => e.Item2);
+                else if (key == ConsoleKey.RightArrow)
+                    colunaDoLado = _Bloco.Posicoes.Where(e => e.Item1 == linha).Max(e => e.Item2);
+                else
+                    throw new Exception("Erro ao validar se pode mover para o lado");
+
+                validacao.Add(Tuple.Create(linha, colunaDoLado));
+            }
+
+            bool podeMover = true;
+            foreach (var item in validacao)
+            {
+                if (key == ConsoleKey.RightArrow)
+                    podeMover = item.Item2 < Matriz.QtdColunas - 1 && Matriz.Posicoes[item.Item1, item.Item2 + 1] == 0;
+                else if (key == ConsoleKey.LeftArrow)
+                    podeMover = item.Item2 > 0 && Matriz.Posicoes[item.Item1, item.Item2 - 1] == 0;
+
+                if (!podeMover)
+                    break;
+            }
+            return podeMover;
+        }
+
+        public void MoverTetraminoParaBaixo(ConsoleKey comando, int volta)
+        {
+            if (!ValidaSePodeMoverParaBaixo())
+            {
+                VerificarSeExistemLinhasCompletas();
+                VerificarDerrota();
+                NovoTetramino();
+                return;
+            }
+
+            if (volta > 0 && comando != ConsoleKey.DownArrow)
+                return;
+
+            _Temp.Clear();
+            foreach (var item in _Bloco.Posicoes)
+            {
+                int linha = item.Item1 - 1;
+                int coluna = item.Item2;
+
+                _Temp.Add(Tuple.Create(linha, coluna));
+            }
+
+            Mover(_Temp);
+        }
+
+        public void GirarTetramino(ConsoleKey comando)
+        {
+
+            if (comando != ConsoleKey.UpArrow)
+                return;
+
+            // adicionar validações nesse método, está dando erro da peça rotacionada estourar a matriz,
+            // adicionar validação para os lados e para baixo, ao girar tem peças se sobrepondo
+
+            EscreverEmPosicao(0);
+            _Bloco.Rotacionar();
+            EscreverEmPosicao(_Bloco.Cor);
+        }
+
+        private bool ValidaSePodeMoverParaBaixo()
+        {
+            var validacao = new List<Tuple<int, int>>();
+            var colunas = _Bloco.Posicoes.Select(x => x.Item2).AsQueryable().Distinct().ToList();
+            foreach (var coluna in colunas)
+            {
+                var linhaMaisBaixa = _Bloco.Posicoes.Where(e => e.Item2 == coluna).Min(e => e.Item1);
+                validacao.Add(Tuple.Create(linhaMaisBaixa, coluna));
+            }
+
+            bool podeMover = true;
+            foreach (var item in validacao)
+            {
+                if (item.Item1 == 0 || Matriz.Posicoes[item.Item1 - 1, item.Item2] > 0)
+                    podeMover = false;
+
+                if (!podeMover)
+                    break;
+            }
+            return podeMover;
+        }
+
+        public void VerificarVitoria()
+        {
+            for (int i = 0; i < Matriz.QtdColunas - 1; i++)
+            {
+                if (Matriz.Posicoes[0, i] == 0)
+                {
+                    StatusJogo = StatusJogo.Vitoria;
+                    return;
+                }
+            }
+
+            StatusJogo = StatusJogo.EmAndamento;
+        }
+
+        public void VerificarDerrota()
+        {
+            for (int i = 0; i < Matriz.QtdColunas - 1; i++)
+            {
+                if (Matriz.Posicoes[Matriz.QtdLinhas - 1, i] != 0)
+                {
+                    StatusJogo = StatusJogo.Derrota;
+                    return;
+                }
+            }
+
+            StatusJogo = StatusJogo.EmAndamento;
+        }
+
+        private void Mover(List<Tuple<int, int>> temp)
+        {
+            // reseta a posição anterior 
+            EscreverEmPosicao(0);
+
+            // move o tetramino para a nova posição
+            _Bloco.Posicoes.Clear();
+            _Bloco.Posicoes.AddRange(temp);
+            EscreverEmPosicao(_Bloco.Cor);
+        }
+
+        public IEnumerable<int> LinhasCompletas(bool resetarLinhaCompleta = true)
+        {
+            var linhasParaRemover = new List<int>();
+            for (int i = 0; i < Matriz.QtdLinhas; i++)
+            {
+                bool linhaCompleta = true;
+                for (int j = 0; j < Matriz.QtdColunas; j++)
+                {
+                    if (Matriz.Posicoes[i, j] == 0)
+                    {
+                        linhaCompleta = false;
+                        break;
+                    }
+                }
+                if (linhaCompleta)
+                {
+                    if (resetarLinhaCompleta)
+                    {
+                        for (int j = 0; j < Matriz.QtdColunas; j++)
+                        {
+                            Matriz.Posicoes[i, j] = 10;
+                        }
+                        new Exibicao().ExibirMatriz();
+                        Console.Beep();
+                        Task.Delay(400).Wait();
+                    }
+                    linhasParaRemover.Add(i);
+                }
+            }
+            return linhasParaRemover;
+        }
+
+        public void VerificarSeExistemLinhasCompletas()
+        {
+            var linhasParaRemover = LinhasCompletas();
+
+            if (!linhasParaRemover.Any())
+                QtdLinhasRemovidas = linhasParaRemover.Count();
+
+            // cria uma nova matriz e copia para ela os dados da matriz original, ignorando as linhas completas
+            int[,] novaMatriz = new int[Matriz.Posicoes.GetLength(0), Matriz.Posicoes.GetLength(1)];
+            int destinoIndice = 0;
+            for (int i = 0; i < Matriz.Posicoes.GetLength(0); i++)
+            {
+                if (!linhasParaRemover.Contains(i))
+                {
+                    for (int j = 0; j < Matriz.Posicoes.GetLength(1); j++)
+                    {
+                        novaMatriz[destinoIndice, j] = Matriz.Posicoes[i, j];
+                    }
+                    destinoIndice++;
+                }
+            }
+
+            Matriz.Posicoes = novaMatriz;
+            QtdLinhasRemovidas = linhasParaRemover.Count();
+
+            VerificarVitoria();
+        }
+
+        public int ObterQtdLinhasEliminadas()
+        {
+            var qtd = QtdLinhasRemovidas;
+            QtdLinhasRemovidas = 0;
+            return qtd;
+        }
+
+        private void NovoTetramino()
+        {
+            _Bloco = TetraminoEstrutura.ObterTetramino();
+            EscreverEmPosicao(_Bloco.Cor);
+        }
+
+        private void EscreverEmPosicao(int valor)
+        {
+            foreach (var item in _Bloco.Posicoes)
+            {
+                Matriz.Posicoes[item.Item1, item.Item2] = valor;
+            }
+        }
+    }
+}
