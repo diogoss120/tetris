@@ -6,11 +6,8 @@ namespace Tetris
     public class Movimentacao
     {
         private Tetramino _Tetramino { get; set; }
-        public int QtdLinhasRemovidas { get; private set; }
+        private int _QtdLinhasRemovidas { get; set; }
         public StatusJogo StatusJogo { get; private set; }
-
-        [DllImport("user32.dll")]
-        static extern short GetAsyncKeyState(int vKey);
 
         public Movimentacao()
         {
@@ -78,6 +75,7 @@ namespace Tetris
             if (!ValidaSePodeMoverParaBaixo())
             {
                 VerificarSeExistemLinhasCompletas();
+                VerificarVitoria();
                 VerificarDerrota();
                 NovoTetramino();
                 return;
@@ -129,7 +127,7 @@ namespace Tetris
             EscreverEmPosicao(_Tetramino.Cor);
         }
 
-        public void VerificarVitoria()
+        private void VerificarVitoria()
         {
             for (int i = 0; i < Matriz.QtdColunas - 1; i++)
             {
@@ -142,7 +140,7 @@ namespace Tetris
             StatusJogo = StatusJogo.EmAndamento;
         }
 
-        public void VerificarDerrota()
+        private void VerificarDerrota()
         {
             for (int i = 0; i < Matriz.QtdColunas - 1; i++)
             {
@@ -164,7 +162,7 @@ namespace Tetris
             EscreverEmPosicao(_Tetramino.Cor);
         }
 
-        public IEnumerable<int> LinhasCompletas()
+        private IEnumerable<int> LinhasCompletas()
         {
             var linhasParaRemover = new List<int>();
             for (int i = 0; i < Matriz.QtdLinhas; i++)
@@ -192,13 +190,13 @@ namespace Tetris
             return linhasParaRemover;
         }
 
-        public void VerificarSeExistemLinhasCompletas()
+        private void VerificarSeExistemLinhasCompletas()
         {
             var linhasParaRemover = LinhasCompletas();
 
             if (!linhasParaRemover.Any())
             {
-                QtdLinhasRemovidas = linhasParaRemover.Count();
+                _QtdLinhasRemovidas = linhasParaRemover.Count();
                 return;
             }
 
@@ -218,14 +216,13 @@ namespace Tetris
             }
 
             Matriz.Posicoes = novaMatriz;
-            QtdLinhasRemovidas = linhasParaRemover.Count();
-            VerificarVitoria();
+            _QtdLinhasRemovidas = linhasParaRemover.Count();
         }
 
         public int ObterQtdLinhasEliminadas()
         {
-            var qtd = QtdLinhasRemovidas;
-            QtdLinhasRemovidas = 0;
+            var qtd = _QtdLinhasRemovidas;
+            _QtdLinhasRemovidas = 0;
             return qtd;
         }
 

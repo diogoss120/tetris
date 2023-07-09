@@ -10,15 +10,6 @@ namespace Tetris
         private int VersaoAtual { get; set; }
         private int MaximoVersoes { get; set; }
 
-        public Tetramino(List<Tuple<int, int>> posicoes, int cor, TipoTetramino tipoDeBloco, int versao, int maximoOpcoes)
-        {
-            Posicoes = posicoes;
-            Cor = cor;
-            TipoTetramino = tipoDeBloco;
-            VersaoAtual = versao;
-            MaximoVersoes = maximoOpcoes;
-        }
-
         public Tetramino()
         {
             Posicoes = new();
@@ -145,7 +136,7 @@ namespace Tetris
             return podeGirar;
         }
 
-        public List<Tuple<int, int>> ValidarPosicaoEstremidades(List<Tuple<int, int>> tetraminoRotacionado)
+        private List<Tuple<int, int>> ValidarPosicaoEstremidades(List<Tuple<int, int>> tetraminoRotacionado)
         {
             var linhas = tetraminoRotacionado.Select(x => x.Item1).AsQueryable().Distinct().ToList();
             int qtdColunasParaMovimentar = 0;
@@ -178,6 +169,7 @@ namespace Tetris
 
         private List<Tuple<int, int>> Reposicionar(int qtdColunasParaMovimentar, bool problemaLadoEsquerdo, bool problemaLadoDireito, List<Tuple<int, int>> tetraminoRotacionado)
         {
+            // se o tetramino estiver ultrapassando os limites da matriz, reposiciona ele para que não ocorra erro
             var temp = new List<Tuple<int, int>>();
             foreach (var item in tetraminoRotacionado)
             {
