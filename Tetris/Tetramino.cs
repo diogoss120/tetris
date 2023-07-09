@@ -1,26 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using Tetris.Enuns;
 
 namespace Tetris
 {
-    public class Bloco
+    public class Tetramino
     {
         public List<Tuple<int, int>> Posicoes { get; set; }
         public int Cor { get; private set; }
-        public string TipoBloco { get; private set; }
-        public int Versao { get; private set; }
+        private TipoTetramino TipoBloco { get; set; }
+        private int Versao { get; set; }
         private int MaximoOpcoes { get; set; }
 
-        public Bloco(List<Tuple<int, int>> posicoes, int cor, string tipoDeBloco, int versao, int maximoOpcoes)
+        public Tetramino(List<Tuple<int, int>> posicoes, int cor, TipoTetramino tipoDeBloco, int versao, int maximoOpcoes)
         {
             Posicoes = posicoes;
             Cor = cor;
             TipoBloco = tipoDeBloco;
             Versao = versao;
             MaximoOpcoes = maximoOpcoes;
-        }
-
-        public Bloco()
-        {
         }
 
         public void Rotacionar()
@@ -31,11 +27,11 @@ namespace Tetris
 
             int coluna = Posicoes[0].Item2;
 
-            if (TipoBloco == "Linha")
+            if (TipoBloco == TipoTetramino.Linha)
             {
                 coluna += 1;
             }
-            else if (TipoBloco == "T")
+            else if (TipoBloco == TipoTetramino.T)
             {
                 if (Versao == 1) coluna -= 1;
                 if (Versao == 3) coluna += 2;
@@ -45,19 +41,16 @@ namespace Tetris
                 coluna = 9;
 
             List<Tuple<int, int>> temp;
-            if (TipoBloco == "L")
-                temp = TetraminoEstrutura.BlocoL(Posicoes[0].Item1, coluna, Versao).Posicoes;
-            else if (TipoBloco == "S")
-                temp = TetraminoEstrutura.BlocoS(Posicoes[0].Item1, coluna, Versao).Posicoes;
-            else if (TipoBloco == "T")
-                temp = TetraminoEstrutura.BlocoT(Posicoes[0].Item1, coluna, Versao).Posicoes;
-            else if (TipoBloco == "Quadrado")
-                temp = TetraminoEstrutura.BlocoQuadrado(Posicoes[0].Item1, coluna, Versao).Posicoes;
+            if (TipoBloco == TipoTetramino.L)
+                temp = TetraminoBase.BlocoL(Posicoes[0].Item1, coluna, Versao).Posicoes;
+            else if (TipoBloco == TipoTetramino.S)
+                temp = TetraminoBase.BlocoS(Posicoes[0].Item1, coluna, Versao).Posicoes;
+            else if (TipoBloco == TipoTetramino.T)
+                temp = TetraminoBase.BlocoT(Posicoes[0].Item1, coluna, Versao).Posicoes;
+            else if (TipoBloco == TipoTetramino.Quadrado)
+                temp = TetraminoBase.BlocoQuadrado(Posicoes[0].Item1, coluna, Versao).Posicoes;
             else // bloco linha
-                temp = TetraminoEstrutura.BlocoLinha(Posicoes[0].Item1, coluna, Versao).Posicoes;
-
-            
-            // validações
+                temp = TetraminoBase.BlocoLinha(Posicoes[0].Item1, coluna, Versao).Posicoes;
 
             temp = ValidarPosicaoEstremidades(temp);
 

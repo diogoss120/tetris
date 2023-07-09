@@ -1,10 +1,12 @@
-﻿namespace Tetris
+﻿using Tetris.Enuns;
+
+namespace Tetris
 {
-    static class TetraminoEstrutura
+    static class TetraminoBase
     {
         private static Random rd { get; set; }
 
-        static TetraminoEstrutura()
+        static TetraminoBase()
         {
             rd = new Random();
         }
@@ -14,7 +16,7 @@
             return rd.Next(0, totalOpcoes);
         }
 
-        public static Bloco ObterTetramino()
+        public static Tetramino ObterTetramino()
         {
             int linhaBase = Matriz.QtdLinhas - 1;
             int colunaBase = Matriz.QtdColunas / 2;
@@ -32,7 +34,7 @@
                 return BlocoLinha(linhaBase, colunaBase);
         }
 
-        public static Bloco BlocoQuadrado(int linhaBase, int colunaBase, int _ = -1)
+        public static Tetramino BlocoQuadrado(int linhaBase, int colunaBase, int _ = -1)
         {
             var itens = new List<Tuple<int, int>> {
                    Tuple.Create(linhaBase, colunaBase - 1),
@@ -41,10 +43,10 @@
                    Tuple.Create(linhaBase - 1, colunaBase)
             };
 
-            return new Bloco(itens, 1, "Quadrado", 1, 1);
+            return new Tetramino(itens, 1, TipoTetramino.Quadrado, 1, 1);
         }
 
-        public static Bloco BlocoLinha(int linhaBase, int colunaBase, int opcao = -1)
+        public static Tetramino BlocoLinha(int linhaBase, int colunaBase, int opcao = -1)
         {
             var itens = new List<Tuple<int, int>>();
 
@@ -66,10 +68,10 @@
                 itens.Add(Tuple.Create(linhaBase, colunaBase + 2));
             }
 
-            return new Bloco(itens, 2, "Linha", opcao, 2);
+            return new Tetramino(itens, 2, TipoTetramino.Linha, opcao, 2);
         }
 
-        public static Bloco BlocoT(int linhaBase, int colunaBase, int opcao = 0)
+        public static Tetramino BlocoT(int linhaBase, int colunaBase, int opcao = 0)
         {
             var itens = new List<Tuple<int, int>>();
 
@@ -105,10 +107,10 @@
                 itens.Add(Tuple.Create(linhaBase - 1, colunaBase));
             }
 
-            return new Bloco(itens, 3, "T", opcao, 4);
+            return new Tetramino(itens, 3, TipoTetramino.T, opcao, 4);
         }
 
-        public static Bloco BlocoL(int linhaBase, int colunaBase, int opcao = -1)
+        public static Tetramino BlocoL(int linhaBase, int colunaBase, int opcao = -1)
         {
             var itens = new List<Tuple<int, int>>();
 
@@ -145,10 +147,10 @@
                 itens.Add(Tuple.Create(linhaBase - 2, colunaBase + 1));
             }
 
-            return new Bloco(itens, 4, "L", opcao, 4);
+            return new Tetramino(itens, 4, TipoTetramino.L, opcao, 4);
         }
 
-        public static Bloco BlocoS(int linhaBase, int colunaBase, int opcao = -1)
+        public static Tetramino BlocoS(int linhaBase, int colunaBase, int opcao = -1)
         {
             var itens = new List<Tuple<int, int>>();
 
@@ -170,7 +172,7 @@
                 itens.Add(Tuple.Create(linhaBase - 2, colunaBase));
             }
 
-            return new Bloco(itens, 5, "S", opcao, 2);
+            return new Tetramino(itens, 5, TipoTetramino.S, opcao, 2);
         }
     }
 }

@@ -3,9 +3,6 @@ https://pt.wikipedia.org/wiki/Tetramin%C3%B3
 
 funcionalidades que preciso adicionar:
 
-
-- adicionar efeitos sonoros (se possível) ao completar uma linha e ao ganhar, como um beep do console por exemplo
-
 - quando o jogo fica muito rápido está dando problema na sensibilidade para rotacionar as peças, precisa analisar isso
 
 - refatorar o código, classes e métodos, reoganizar na classe correta os métodos, criar mais classes se necessário. Principalmente

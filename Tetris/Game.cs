@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using Tetris.Enuns;
 
 namespace Tetris
 {
@@ -6,7 +7,7 @@ namespace Tetris
     {
         private Exibicao Exibicao { get; set; }
         private Movimentacao Movimentacao { get; set; }
-        private int TempoRecarregamento { get; set; }
+        private int TempoDescerPeca { get; set; }
         private int QuebrasNoTempo { get; set; }
         private int Pontos { get; set; }
         private int Nivel { get; set; }
@@ -17,7 +18,7 @@ namespace Tetris
 
         public Game()
         {
-            TempoRecarregamento = 600;
+            TempoDescerPeca = 600;
             Movimentacao = new Movimentacao();
             Exibicao = new Exibicao();
             QuebrasNoTempo = 8;
@@ -42,7 +43,7 @@ namespace Tetris
                 op = int.Parse(Console.ReadLine() ?? "1");
                 if (op == 1)
                 {
-                    Exibicao.ExibirMatriz();
+                    Exibicao.ExibirPlacarMatriz();
                     Run();
                 }
                 else
@@ -52,11 +53,13 @@ namespace Tetris
                         x =>
                         {
                             var conteudo = x.Split('|');
-                            var dict = new Dictionary<string, string>();
-                            dict.Add("data", conteudo[0]);
-                            dict.Add("nivel", conteudo[1]);
-                            dict.Add("pontos", conteudo[2]);
-                            dict.Add("resultado", conteudo[3]);
+                            var dict = new Dictionary<string, string>
+                            {
+                                { "data", conteudo[0] },
+                                { "nivel", conteudo[1] },
+                                { "pontos", conteudo[2] },
+                                { "resultado", conteudo[3] }
+                            };
                             historico.Add(dict);
                         }
                     );
@@ -86,7 +89,7 @@ namespace Tetris
                         break;
                     };
 
-                    Movimentacao.GirarTetramino(comando);
+                    Movimentacao.RotacionarTetramino(comando);
 
                     Movimentacao.MoverTetraminoParaBaixo(comando, volta);
                     if (Movimentacao.StatusJogo != StatusJogo.EmAndamento)
@@ -97,11 +100,11 @@ namespace Tetris
 
                     Movimentacao.MoverTetraminoParaLados(comando);
 
-                    Exibicao.ExibirMatriz(TempoRecarregamento, Pontos, Nivel);
+                    Exibicao.ExibirPlacarMatriz(TempoDescerPeca, Pontos, Nivel);
 
                     VerificarPontuacao(Movimentacao.ObterQtdLinhasEliminadas());
 
-                    Task.Delay(TempoRecarregamento / QuebrasNoTempo).Wait();
+                    Task.Delay(TempoDescerPeca / QuebrasNoTempo).Wait();
                 }
             }
 
@@ -113,23 +116,18 @@ namespace Tetris
 
         private ConsoleKey ObterComando()
         {
-            Task<ConsoleKey> task = Task.Run(() =>
-            {
-                if (GetAsyncKeyState(37) != 0)
-                    return ConsoleKey.LeftArrow;
-                else if (GetAsyncKeyState(39) != 0)
-                    return ConsoleKey.RightArrow;
-                else if (GetAsyncKeyState(40) != 0)
-                    return ConsoleKey.DownArrow;
-                else if (GetAsyncKeyState(38) != 0)
-                    return ConsoleKey.UpArrow;
-                else if (GetAsyncKeyState(27) != 0)
-                    return ConsoleKey.Escape;
+            if (GetAsyncKeyState(37) != 0)
+                return ConsoleKey.LeftArrow;
+            else if (GetAsyncKeyState(39) != 0)
+                return ConsoleKey.RightArrow;
+            else if (GetAsyncKeyState(40) != 0)
+                return ConsoleKey.DownArrow;
+            else if (GetAsyncKeyState(38) != 0)
+                return ConsoleKey.UpArrow;
+            else if (GetAsyncKeyState(27) != 0)
+                return ConsoleKey.Escape;
 
-                return ConsoleKey.Spacebar;
-            });
-
-            return task.Result;
+            return ConsoleKey.Spacebar;
         }
 
         private void VerificarPontuacao(int qtdLinhasRemovidas)
@@ -145,7 +143,7 @@ namespace Tetris
             {
                 Pontos -= 5;
                 Nivel += 1;
-                TempoRecarregamento = Convert.ToInt32(TempoRecarregamento * 0.90);
+                TempoDescerPeca = Convert.ToInt32(TempoDescerPeca * 0.90);
             }
         }
     }

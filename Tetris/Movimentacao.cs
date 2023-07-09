@@ -1,22 +1,20 @@
 ﻿using System.Runtime.InteropServices;
+using Tetris.Enuns;
 
 namespace Tetris
 {
     public class Movimentacao
     {
-        private List<Tuple<int, int>> _Temp { get; set; }
-        private Bloco _Bloco { get; set; }
+        private Tetramino _Tetramino { get; set; }
+        public int QtdLinhasRemovidas { get; private set; }
+        public StatusJogo StatusJogo { get; private set; }
 
         [DllImport("user32.dll")]
         static extern short GetAsyncKeyState(int vKey);
 
-        public int QtdLinhasRemovidas { get; private set; }
-        public StatusJogo StatusJogo { get; private set; }
-
         public Movimentacao()
         {
-            _Bloco = new Bloco();
-            _Temp = new List<Tuple<int, int>>();
+            _Tetramino = TetraminoBase.ObterTetramino();
             NovoTetramino();
         }
 
@@ -28,8 +26,8 @@ namespace Tetris
             if (!ValidaSePodeMoverParaLado(comando))
                 return;
 
-            _Temp.Clear();
-            foreach (var item in _Bloco.Posicoes)
+            var temp = new List<Tuple<int, int>>();
+            foreach (var item in _Tetramino.Posicoes)
             {
                 int linha = item.Item1;
                 int coluna = item.Item2;
@@ -39,23 +37,23 @@ namespace Tetris
                 else if (comando == ConsoleKey.RightArrow)
                     coluna++;
 
-                _Temp.Add(Tuple.Create(linha, coluna));
+                temp.Add(Tuple.Create(linha, coluna));
             }
 
-            Mover(_Temp);
+            Mover(temp);
         }
 
         private bool ValidaSePodeMoverParaLado(ConsoleKey key)
         {
             var validacao = new List<Tuple<int, int>>();
-            var linhas = _Bloco.Posicoes.Select(x => x.Item1).AsQueryable().Distinct().ToList();
+            var linhas = _Tetramino.Posicoes.Select(x => x.Item1).AsQueryable().Distinct().ToList();
             foreach (var linha in linhas)
             {
                 int colunaDoLado = 0;
                 if (key == ConsoleKey.LeftArrow)
-                    colunaDoLado = _Bloco.Posicoes.Where(e => e.Item1 == linha).Min(e => e.Item2);
+                    colunaDoLado = _Tetramino.Posicoes.Where(e => e.Item1 == linha).Min(e => e.Item2);
                 else if (key == ConsoleKey.RightArrow)
-                    colunaDoLado = _Bloco.Posicoes.Where(e => e.Item1 == linha).Max(e => e.Item2);
+                    colunaDoLado = _Tetramino.Posicoes.Where(e => e.Item1 == linha).Max(e => e.Item2);
                 else
                     throw new Exception("Erro ao validar se pode mover para o lado");
 
@@ -89,39 +87,24 @@ namespace Tetris
             if (volta > 0 && comando != ConsoleKey.DownArrow)
                 return;
 
-            _Temp.Clear();
-            foreach (var item in _Bloco.Posicoes)
+            var temp = new List<Tuple<int, int>>();
+            foreach (var item in _Tetramino.Posicoes)
             {
                 int linha = item.Item1 - 1;
                 int coluna = item.Item2;
-
-                _Temp.Add(Tuple.Create(linha, coluna));
+                temp.Add(Tuple.Create(linha, coluna));
             }
 
-            Mover(_Temp);
-        }
-
-        public void GirarTetramino(ConsoleKey comando)
-        {
-
-            if (comando != ConsoleKey.UpArrow)
-                return;
-
-            // adicionar validações nesse método, está dando erro da peça rotacionada estourar a matriz,
-            // adicionar validação para os lados e para baixo, ao girar tem peças se sobrepondo
-
-            EscreverEmPosicao(0);
-            _Bloco.Rotacionar();
-            EscreverEmPosicao(_Bloco.Cor);
+            Mover(temp);
         }
 
         private bool ValidaSePodeMoverParaBaixo()
         {
             var validacao = new List<Tuple<int, int>>();
-            var colunas = _Bloco.Posicoes.Select(x => x.Item2).AsQueryable().Distinct().ToList();
+            var colunas = _Tetramino.Posicoes.Select(x => x.Item2).AsQueryable().Distinct().ToList();
             foreach (var coluna in colunas)
             {
-                var linhaMaisBaixa = _Bloco.Posicoes.Where(e => e.Item2 == coluna).Min(e => e.Item1);
+                var linhaMaisBaixa = _Tetramino.Posicoes.Where(e => e.Item2 == coluna).Min(e => e.Item1);
                 validacao.Add(Tuple.Create(linhaMaisBaixa, coluna));
             }
 
@@ -137,6 +120,16 @@ namespace Tetris
             return podeMover;
         }
 
+        public void RotacionarTetramino(ConsoleKey comando)
+        {
+            if (comando != ConsoleKey.UpArrow)
+                return;
+
+            EscreverEmPosicao(0);
+            _Tetramino.Rotacionar();
+            EscreverEmPosicao(_Tetramino.Cor);
+        }
+
         public void VerificarVitoria()
         {
             for (int i = 0; i < Matriz.QtdColunas - 1; i++)
@@ -147,7 +140,6 @@ namespace Tetris
                     return;
                 }
             }
-
             StatusJogo = StatusJogo.EmAndamento;
         }
 
@@ -161,22 +153,19 @@ namespace Tetris
                     return;
                 }
             }
-
             StatusJogo = StatusJogo.EmAndamento;
         }
 
         private void Mover(List<Tuple<int, int>> temp)
         {
-            // reseta a posição anterior 
             EscreverEmPosicao(0);
 
-            // move o tetramino para a nova posição
-            _Bloco.Posicoes.Clear();
-            _Bloco.Posicoes.AddRange(temp);
-            EscreverEmPosicao(_Bloco.Cor);
+            _Tetramino.Posicoes.Clear();
+            _Tetramino.Posicoes.AddRange(temp);
+            EscreverEmPosicao(_Tetramino.Cor);
         }
 
-        public IEnumerable<int> LinhasCompletas(bool resetarLinhaCompleta = true)
+        public IEnumerable<int> LinhasCompletas()
         {
             var linhasParaRemover = new List<int>();
             for (int i = 0; i < Matriz.QtdLinhas; i++)
@@ -192,16 +181,12 @@ namespace Tetris
                 }
                 if (linhaCompleta)
                 {
-                    if (resetarLinhaCompleta)
+                    for (int j = 0; j < Matriz.QtdColunas; j++)
                     {
-                        for (int j = 0; j < Matriz.QtdColunas; j++)
-                        {
-                            Matriz.Posicoes[i, j] = 10;
-                        }
-                        new Exibicao().ExibirMatriz();
-                        Console.Beep();
-                        Task.Delay(400).Wait();
+                        // seta o número 10 para ele ser printado na cor branca e o usuário perceber qual linha será removida
+                        Matriz.Posicoes[i, j] = 10; 
                     }
+                    new Exibicao().ExibirEliminacaoLinha();
                     linhasParaRemover.Add(i);
                 }
             }
@@ -213,16 +198,19 @@ namespace Tetris
             var linhasParaRemover = LinhasCompletas();
 
             if (!linhasParaRemover.Any())
+            {
                 QtdLinhasRemovidas = linhasParaRemover.Count();
+                return;
+            }
 
             // cria uma nova matriz e copia para ela os dados da matriz original, ignorando as linhas completas
-            int[,] novaMatriz = new int[Matriz.Posicoes.GetLength(0), Matriz.Posicoes.GetLength(1)];
+            int[,] novaMatriz = new int[Matriz.QtdLinhas, Matriz.QtdColunas];
             int destinoIndice = 0;
-            for (int i = 0; i < Matriz.Posicoes.GetLength(0); i++)
+            for (int i = 0; i < Matriz.QtdLinhas; i++)
             {
                 if (!linhasParaRemover.Contains(i))
                 {
-                    for (int j = 0; j < Matriz.Posicoes.GetLength(1); j++)
+                    for (int j = 0; j < Matriz.QtdColunas; j++)
                     {
                         novaMatriz[destinoIndice, j] = Matriz.Posicoes[i, j];
                     }
@@ -232,7 +220,6 @@ namespace Tetris
 
             Matriz.Posicoes = novaMatriz;
             QtdLinhasRemovidas = linhasParaRemover.Count();
-
             VerificarVitoria();
         }
 
@@ -245,13 +232,13 @@ namespace Tetris
 
         private void NovoTetramino()
         {
-            _Bloco = TetraminoEstrutura.ObterTetramino();
-            EscreverEmPosicao(_Bloco.Cor);
+            _Tetramino = TetraminoBase.ObterTetramino();
+            EscreverEmPosicao(_Tetramino.Cor);
         }
 
         private void EscreverEmPosicao(int valor)
         {
-            foreach (var item in _Bloco.Posicoes)
+            foreach (var item in _Tetramino.Posicoes)
             {
                 Matriz.Posicoes[item.Item1, item.Item2] = valor;
             }
