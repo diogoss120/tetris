@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using Tetris.Enuns;
+﻿using Tetris.Enuns;
 
 namespace Tetris
 {
