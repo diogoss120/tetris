@@ -11,6 +11,8 @@ O principal objetivo deste projeto foi servir como um exercício prático para a
 
 A intenção não foi criar grandes arquiteturas de software ou utilizar padrões complexos, mas sim exercitar o raciocínio lógico fundamental para implementar a mecânica do jogo, como a movimentação, rotação e colisão das peças, além da detecção e limpeza de linhas completas no tabuleiro.
 
+Gravei um vídeo para demonstração do jogo em execução, acesse através do link: https://drive.google.com/file/d/1x0vQ3z30XDHdbZJTFW4GnnXwNfsO6JL3/view?usp=sharing
+
 ## ✨ Funcionalidades Principais (Baseado nos Requisitos de Desenvolvimento)
 
 Desenvolvido com base em um conjunto claro de requisitos para garantir uma experiência de jogo completa e envolvente:
