@@ -69,8 +69,8 @@ Desenvolvido com base em um conjunto claro de requisitos para garantir uma exper
 
 1.  Clone este repositório:
     ```bash
-    git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
-    cd SEU_REPOSITORIO
+    git clone https://github.com/diogoss120/tetris.git
+    cd tetris
     ```
 2.  Restaure as dependências (se necessário):
     ```bash
